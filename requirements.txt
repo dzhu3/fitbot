@@ -7,7 +7,6 @@ langchain-community
 unstructured
 sentence-transformers 
 transformers
-logging
 importlib
 gradio
 python-dotenv
