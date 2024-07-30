@@ -3,6 +3,7 @@ import logging
 import gradio as gr
 from fitness_agent import FitnessAgent
 from dotenv import load_dotenv
+from fastapi import FastAPI
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -66,7 +67,13 @@ def main(model_type):
         description=fitness_agent.generate_introduction(),
     )
 
-    chat_interface.launch()
+    app = FastAPI()
+
+    @app.get('/')
+    async def root():
+        return 'Gradio app is running at /gradio', 200
+    
+    app = gr.mount_gradio_app(app, chat_interface, path='/gradio')
 
 if __name__ == "__main__":
     import sys

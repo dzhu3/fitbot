@@ -3,7 +3,6 @@ faiss-cpu
 openai
 langchain
 langchain-openai
-langchain-community
 unstructured
 sentence-transformers 
 transformers
