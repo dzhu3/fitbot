@@ -144,7 +144,7 @@ class DGAgent:
                     <td>Recovery</td>
                 </tr>
             </table>
-            If the response is too conclusive, include the question {random.choice(questions)} at the end of the response to promote further engagement, only if the question has not yet been asked or answered.
+            If the response does not already include a question at the end, include the question {random.choice(questions)} at the end of the response to promote further engagement, only if the question has not yet been asked or answered.
             Question: {{question}}
             Context: {{context}}
             Answer:

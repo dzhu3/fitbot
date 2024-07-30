@@ -2,13 +2,16 @@ import os
 import logging
 import gradio as gr
 from fitness_agent import FitnessAgent
+from dotenv import load_dotenv
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+load_dotenv()
+
 # Now you can access the variables using os.environ
-openai_api_key = 'sk-proj-H8J0PhMPn9sGTpBUFf5sT3BlbkFJUZa4MnESwTiUF4pk60pt'
-nut_api_key = '/JoyE7nHKUdpTvmLqnOnFQ==5K3i7qh7GToJufhE'
+openai_api_key = os.getenv('openai_api_key')
+nut_api_key = os.getenv('nut_api_key')
 
 def get_response(message, history, fitness_agent):
 
