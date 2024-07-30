@@ -7,4 +7,4 @@ if __name__ == '__main__':
     parser.add_argument('--llm', type=str, required=True, choices=['davidgoggins', 'anime', 'ali', 'gpt4'], default='davidgoggins', help="Specify which LLM to use")
     args = parser.parse_args()
 
-    app = chatbot.main(args.llm)
+    chatbot.main(args.llm)
