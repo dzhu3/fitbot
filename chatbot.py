@@ -10,8 +10,8 @@ logger = logging.getLogger(__name__)
 load_dotenv()
 
 # Now you can access the variables using os.environ
-openai_api_key = os.getenv('openai_api_key')
-nut_api_key = os.getenv('nut_api_key')
+openai_api_key = os.getenv('OPENAI_API_KEY')
+nut_api_key = os.getenv('NUT_API_KEY')
 
 def get_response(message, history, fitness_agent):
 
