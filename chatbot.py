@@ -75,6 +75,8 @@ def main(model_type):
     
     app = gr.mount_gradio_app(app, chat_interface, path='/gradio')
 
+    return app
+
 if __name__ == "__main__":
     import sys
     main(sys.argv[1])
