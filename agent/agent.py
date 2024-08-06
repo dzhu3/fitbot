@@ -36,21 +36,7 @@ data = loaders.load()
 text_splitter = CharacterTextSplitter(separator='\n', chunk_size=1500, chunk_overlap=200)
 docs = text_splitter.split_documents(data)
 
-questions = ["What are your short term goals to achieve?",
-"How often do you exercise?",
-"What kind of food are you eating in your diet?",
-"Do you prefer working out in the morning or evening?",
-"Are there any specific areas of your body you'd like to focus on?",
-"How much sleep do you get on average each night?",
-"How much water do you drink in a day?"
-"What motivates you to stay fit?",
-"Are there any exercises you enjoy or dislike?",
-"How do you track your progress?",
-"Do you have any fitness challenges you're facing?",
-"Do you have any current or past injuries I should be aware of?",
-"Are You Currently Under the Care of a Doctor?",
-"How do you usually handle stress and recovery?"
-]
+questions = "What are your short term goals to achieve?, How often do you exercise?, What kind of food are you eating in your diet?, Do you prefer working out in the morning or evening?, Are there any specific areas of your body you'd like to focus on?, How much sleep do you get on average each night?, How much water do you drink in a day?, What motivates you to stay fit?, Are there any exercises you enjoy or dislike?, How do you track your progress?, Do you have any fitness challenges you're facing?, Do you have any current or past injuries I should be aware of?, Are You Currently Under the Care of a Doctor?, How do you usually handle stress and recovery?"
 
 class DGAgent:
     def __init__(
@@ -99,9 +85,10 @@ class DGAgent:
 
         template = f"""You are a fitness assistant for question-answering tasks.
             Use the following pieces of retrieved context to answer the question.
-            Answer in the style of {self.style}. Be detailed in your response. Follow the conversation flow using the chat history: {chat_history_str}, make sure to use line spaces to break up response, and if it is not known, ask for the user's weight, height and gender. Also ask for the user's fitness goals if not asked before.
-            If the response does not require a table, provide a detailed textual response in the specified style.
-            If the response requires a table (e.g., weekly exercise routine), include it in HTML format. For example:
+            Answer in the style of {self.style}. Be detailed in your response. Follow the conversation flow using the chat history: {chat_history_str}, make sure to use line spaces to break up response, 
+            If it is not included in chat history, ask for the user's weight, height and gender. Also ask for the user's fitness goals.
+            If the response does not require a table, provide a textual response in the specified style.
+            Only if the response requires a table (e.g., weekly exercise routine), include it in HTML format. For example:
             <table>
                 <tr>
                     <th>Day</th>
@@ -144,7 +131,8 @@ class DGAgent:
                     <td>Recovery</td>
                 </tr>
             </table>
-            If the response does not already include a question at the end, include the question {random.choice(questions)} at the end of the response to promote further engagement, only if the question has not yet been asked or answered.
+            Make sure you only have 1 question in the entire response. Do not introduce yourself again if already done.
+            If the response does not already include a question at the end, include one random question from {questions} at the end of the response that follows the flow to promote further engagement, only if the question has not yet been asked or answered.
             Question: {{question}}
             Context: {{context}}
             Answer:
