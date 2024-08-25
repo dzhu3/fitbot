@@ -36,7 +36,21 @@ data = loaders.load()
 text_splitter = CharacterTextSplitter(separator='\n', chunk_size=1500, chunk_overlap=200)
 docs = text_splitter.split_documents(data)
 
-questions = "What are your short term goals to achieve?, How often do you exercise?, What kind of food are you eating in your diet?, Do you prefer working out in the morning or evening?, Are there any specific areas of your body you'd like to focus on?, How much sleep do you get on average each night?, How much water do you drink in a day?, What motivates you to stay fit?, Are there any exercises you enjoy or dislike?, How do you track your progress?, Do you have any fitness challenges you're facing?, Do you have any current or past injuries I should be aware of?, Are You Currently Under the Care of a Doctor?, How do you usually handle stress and recovery?"
+questions = ["What are your short term goals to conquer?",
+"How often are you putting in the work?",
+    "What fuel are you putting into your body?",
+    "Are you hitting it hard in the morning, or are you more of an evening grinder?",
+    "Any specific areas you're ready to attack?",
+    "How many hours are you clocking in for rest each night?",
+    "How much water are you pushing through your system daily?",
+    "What keeps you locked in and pushing forward?",
+    "Which exercises get you fired up, and which ones are you avoiding?",
+    "How are you keeping track of your grind?",
+    "What challenges are you battling right now?",
+    "Any injuries or setbacks I need to know about?",
+    "Are you currently working with a doctor?",
+    "How do you handle stress and recovery after the battle?"
+]
 
 class DGAgent:
     def __init__(
@@ -75,20 +89,40 @@ class DGAgent:
     
     def _convert_chat_history_to_string(self) -> str:
         return "\n".join([f"{entry['role']}: {entry['content']}" for entry in self.chat_history])
-
-
-    def ask(self, query: str) -> str:
-        self.chat_history.append({'role': 'user', 'content': query})
-
-        chat_history_str = self._convert_chat_history_to_string()
-
+    
+    def ask_first(self, query: str) -> str:
 
         template = f"""You are a fitness assistant for question-answering tasks.
-            Use the following pieces of retrieved context to answer the question.
-            Answer in the style of {self.style}. Be detailed in your response. Follow the conversation flow using the chat history: {chat_history_str}, make sure to use line spaces to break up response, 
-            If it is not included in chat history, ask for the user's weight, height and gender. Also ask for the user's fitness goals.
+            Answer in the style of {self.style}. Introduce yourself. Make sure to use line spaces to break up the response.
+            Ask for the user's height, age, weight, and gender to help curate a personalized fitness routine.
+            """
+        prompt = ChatPromptTemplate.from_template(template)
+        rag_chain = (
+            {"context": self.retriever, "question": RunnablePassthrough()}
+            | prompt
+            | self.llm
+            | StrOutputParser()
+        )
+        
+        response = rag_chain.invoke(query)
+        return response
+
+
+
+    def ask(self, query: str, history) -> str:
+        history.append({'role': 'assistant', 'content': query})
+
+        def _convert_chat_history_to_string(history2) -> str:
+            return "\n".join([f"{entry['role']}: {entry['content']}" for entry in history2])
+        
+        chat_history_str = _convert_chat_history_to_string(history)
+
+
+        template = f"""You are a fitness assistant for question-answering tasks. Do not introduce yourself again.
+            Use the following pieces of retrieved context to answer the question. Be detailed in your response.
+            Answer in the style of {self.style}. Follow the conversation flow using the chat history: {chat_history_str}, make sure to use line spaces to break up response. Do not repeat responses.
             If the response does not require a table, provide a textual response in the specified style.
-            Only if the response requires a table (e.g., weekly exercise routine), include it in HTML format. For example:
+            Only if the response requires a table (e.g., weekly exercise routine), include it in HTML format, and be detailed in the response. For example:
             <table>
                 <tr>
                     <th>Day</th>
@@ -97,42 +131,41 @@ class DGAgent:
                 </tr>
                 <tr>
                     <td>Monday</td>
-                    <td>Running</td>
+                    <td>Sample exercise</td>
                     <td>30 mins</td>
                 </tr>
                 <tr>
                     <td>Tuesday</td>
-                    <td>Strength Training</td>
+                    <td>Sample exercise</td>
                     <td>45 mins</td>
                 </tr>
                 <tr>
                     <td>Wednesday</td>
-                    <td>Yoga</td>
+                    <td>Sample exercise</td>
                     <td>60 mins</td>
                 </tr>
                 <tr>
                     <td>Thursday</td>
-                    <td>HIIT</td>
+                    <td>Sample exercise</td>
                     <td>30 mins</td>
                 </tr>
                 <tr>
                     <td>Friday</td>
-                    <td>Cardio</td>
+                    <td>Sample exercise</td>
                     <td>40 mins</td>
                 </tr>
                 <tr>
                     <td>Saturday</td>
-                    <td>Weight Lifting</td>
+                    <td>Sample exercise</td>
                     <td>50 mins</td>
                 </tr>
                 <tr>
                     <td>Sunday</td>
-                    <td>Rest Day</td>
-                    <td>Recovery</td>
+                    <td>Sample exercise</td>
+                    <td>50 mins</td>
                 </tr>
             </table>
-            Make sure you only have 1 question in the entire response. Do not introduce yourself again if already done.
-            If the response does not already include a question at the end, include one random question from {questions} at the end of the response that follows the flow to promote further engagement, only if the question has not yet been asked or answered.
+            Make sure you only have 1 question in the entire response. Include {questions.pop()} at the end of the response that follows the flow to promote further engagement.
             Question: {{question}}
             Context: {{context}}
             Answer:
@@ -146,8 +179,8 @@ class DGAgent:
         )
         
         response = rag_chain.invoke(query)
-        self.chat_history.append({'role': 'assistant', 'content': response})
-        return response
+        history.append({'role': 'assistant', 'content': response})
+        return response, history
     
     def _parse_functions(self, functions: Optional[list]) -> Optional[list]:
         if functions is None:

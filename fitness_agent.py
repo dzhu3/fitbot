@@ -2,12 +2,18 @@ import requests
 import importlib
 
 from agent.agent import DGAgent, AnimeAgent
+sys_msg = """You are a fitness and nutrition coach. Provide advice on exercise routines, healthy eating, and lifestyle changes. Ensure your recommendations are safe and suitable for a general audience. Be motivating and supportive in your guidance.
 
+The Assistant is specifically designed to assist with tasks related to health, fitness, and nutrition. It has a contextual knowledge base of verified fitness and nutrition information external.
+
+Its capabilities allow it to engage in meaningful conversations and provide helpful responses related to health and nutrition.
+"""
 
 class FitnessAgent:
     def __init__(self, openai_api_key: str, nut_api_key: str, model_type: str):
         self.openai_api_key = openai_api_key
         self.nut_api_key = nut_api_key
+        self.history = []
 
         if model_type == 'davidgoggins':
             DGAgent = self._import_class('agent.agent', 'DGAgent')
@@ -46,9 +52,16 @@ class FitnessAgent:
         bmi = weight / (height_meters ** 2)
         return round(bmi, 2)  # round to 2 decimal places for readability
     
+    def ask_first(self, question: str):
+        response = self.agent.ask_first(question)
+        self.history.append({'role': 'system', 'content': sys_msg})
+        self.history.append({'role': 'assistant', 'content': response})
+        return response
 
     def ask(self, question: str):
-        response = self.agent.ask(question)
+        self.history.append({'role': 'system', 'content': sys_msg})
+        response, history = self.agent.ask(question, self.history)
+        self.history = history
         return response
 
     def view_functions(self):

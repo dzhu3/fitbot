@@ -14,6 +14,43 @@ load_dotenv()
 openai_api_key = os.getenv('OPENAI_API_KEY')
 nut_api_key = os.getenv('NUT_API_KEY')
 
+def get_first_response(message, history, fitness_agent):
+
+    logger.info(f'Chat history: {history}')
+
+    formatted_chat_history = [
+        {
+            'role': 'system',
+            'content':"""You are a fitness and nutrition coach. Provide advice on exercise routines, healthy eating, and lifestyle changes. Ensure your recommendations are safe and suitable for a general audience. Be motivating and supportive in your guidance.
+
+The Assistant is specifically designed to assist with tasks related to health, fitness, and nutrition. It has a contextual knowledge base of verified fitness and nutrition information external.
+
+Its capabilities allow it to engage in meaningful conversations and provide helpful responses related to health and nutrition.
+"""
+        }
+    ]
+
+    if history:
+        for i, chat in enumerate(history[0]):
+            formatted_chat_history.append({
+                'role': 'user' if i % 2 == 0 else 'assistant',
+                'content': chat
+            })
+
+        logger.info(formatted_chat_history)
+        fitness_agent.chat_history = formatted_chat_history
+
+        logger.info(fitness_agent.chat_history)
+    else:
+        history.append(formatted_chat_history)
+
+    # Get raw chat response
+    res = fitness_agent.ask_first(message)
+
+    chat_response = res
+
+    return chat_response
+
 def get_response(message, history, fitness_agent):
 
     logger.info(f'Chat history: {history}')
@@ -59,7 +96,11 @@ def main(model_type):
         }
 
     def wrapped_get_response(message, history):
-        return get_response(message, history, fitness_agent)
+        if not history:
+            history = []
+            return get_first_response(message, history, fitness_agent)
+        else:
+            return get_response(message, history, fitness_agent)
 
     chat_interface = gr.ChatInterface(
         fn=wrapped_get_response,
@@ -67,6 +108,8 @@ def main(model_type):
         description=fitness_agent.generate_introduction(),
     )
 
+    chat_interface.launch(share=True) #for test
+'''
     app = FastAPI()
 
     @app.get('/')
@@ -78,7 +121,7 @@ def main(model_type):
     return app
 
 app = main('davidgoggins')
-
+'''
 if __name__ == "__main__":
     import sys
     main(sys.argv[1])

@@ -1,3 +1,9 @@
+---
+title: FitBot-main
+app_file: chatbot.py
+sdk: gradio
+sdk_version: 4.39.0
+---
 # FitBot: An Advanced Health-Centric Chatbot
 
 FitBot is an AI-driven chatbot that uses large language models (LLMs) such as GPT-4 by OpenAI. It seamlessly integrates with the Nutrition endpoint from API Ninjas, providing accurate nutritional data and personalized health recommendations.
