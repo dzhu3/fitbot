@@ -27,7 +27,9 @@ urls = [
     'https://www.healthline.com/health/fitness/explosive-workouts#tips-and-considerations',
     'https://www.healthline.com/nutrition/workout-routine-for-men#home-exercises',
     'https://www.muscleandfitness.com/routine/workouts/workout-routines/build-brute-strength-workout/',
-    'https://www.helpguide.org/articles/healthy-living/what-are-the-best-exercises-for-me.htm',    
+    'https://www.helpguide.org/articles/healthy-living/what-are-the-best-exercises-for-me.htm',
+    'https://dr-muscle.com/bodybuilding-meal-plan/',
+    'https://www.healthline.com/nutrition/bodybuilding-meal-plan#supplements'    
 ]
 
 loaders = UnstructuredURLLoader(urls=urls)
@@ -36,21 +38,7 @@ data = loaders.load()
 text_splitter = CharacterTextSplitter(separator='\n', chunk_size=1500, chunk_overlap=200)
 docs = text_splitter.split_documents(data)
 
-questions = ["What are your short term goals to conquer?",
-"How often are you putting in the work?",
-    "What fuel are you putting into your body?",
-    "Are you hitting it hard in the morning, or are you more of an evening grinder?",
-    "Any specific areas you're ready to attack?",
-    "How many hours are you clocking in for rest each night?",
-    "How much water are you pushing through your system daily?",
-    "What keeps you locked in and pushing forward?",
-    "Which exercises get you fired up, and which ones are you avoiding?",
-    "How are you keeping track of your grind?",
-    "What challenges are you battling right now?",
-    "Any injuries or setbacks I need to know about?",
-    "Are you currently working with a doctor?",
-    "How do you handle stress and recovery after the battle?"
-]
+questions = "What are your short term goals to conquer?, How often are you putting in the work?, What fuel are you putting into your body?, Are you hitting it hard in the morning, or are you more of an evening grinder?, Any specific areas you're ready to attack?, How many hours are you clocking in for rest each night?, How much water are you pushing through your system daily?, What keeps you locked in and pushing forward?, Which exercises get you fired up, and which ones are you avoiding?, How are you keeping track of your grind?, What challenges are you battling right now?, Any injuries or setbacks I need to know about?, Are you currently working with a doctor?, How do you handle stress and recovery after the battle?"
 
 class DGAgent:
     def __init__(
@@ -122,7 +110,7 @@ class DGAgent:
             Use the following pieces of retrieved context to answer the question. Be detailed in your response.
             Answer in the style of {self.style}. Follow the conversation flow using the chat history: {chat_history_str}, make sure to use line spaces to break up response. Do not repeat responses.
             If the response does not require a table, provide a textual response in the specified style.
-            Only if the response requires a table (e.g., weekly exercise routine), include it in HTML format, and be detailed in the response. For example:
+            If the response requires a table (e.g., weekly exercise routine), include it in HTML format, and be detailed in the response. For example:
             <table>
                 <tr>
                     <th>Day</th>
@@ -165,7 +153,8 @@ class DGAgent:
                     <td>50 mins</td>
                 </tr>
             </table>
-            Make sure you only have 1 question in the entire response. Include {questions.pop()} at the end of the response that follows the flow to promote further engagement.
+            Make sure you only include one question to end with. 
+            Make sure you only have 1 question at the end. Make sure to end your response with a question that encourages the user to share more about their preferences, experiences, or thoughts. Some questions you can ask are: What are your short term goals to conquer?, How often are you putting in the work?, What fuel are you putting into your body?, Are you hitting it hard in the morning, or are you more of an evening grinder?, Any specific areas you're ready to attack?, How many hours are you clocking in for rest each night?, How much water are you pushing through your system daily?, What keeps you locked in and pushing forward?, Which exercises get you fired up, and which ones are you avoiding?, How are you keeping track of your grind?, What challenges are you battling right now?, Any injuries or setbacks I need to know about?, How do you handle stress and recovery after the battle?. Do not repeat a question that has already been asked. If the response or question is too conclusive, end with "Is there anything else I can help with?" make sure only one question is asked.
             Question: {{question}}
             Context: {{context}}
             Answer:

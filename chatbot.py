@@ -108,7 +108,7 @@ def main(model_type):
         description=fitness_agent.generate_introduction(),
     )
 
-    chat_interface.launch()
+    chat_interface.launch(share=True)
 '''
     app = FastAPI()
 
